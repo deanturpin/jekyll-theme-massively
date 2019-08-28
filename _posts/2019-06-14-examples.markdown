@@ -1,0 +1,11 @@
+---
+layout: post
+title: Contributions
+date: '2019-06-14 14:33:48'
+---
+
+- [GitHub](https://github.com/deanturpin)
+- [Wikipedia contributions](http://tools.wmflabs.org/guc/?user=Dean+Turbo)
+- [Docker files](https://hub.docker.com/u/deanturpin/)
+- [Travis CI builds](https://travis-ci.org/deanturpin)
+- [LinkedIn](https://www.linkedin.com/in/deanturpin/)

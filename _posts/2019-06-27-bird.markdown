@@ -1,0 +1,31 @@
+---
+layout: post
+title: Bird in a bird
+date: '2019-06-27 12:01:30'
+tags:
+- c
+- oop
+- fridayquiz
+- chmod666
+---
+
+How many times is the destructor called?
+
+<!--kg-card-begin: code-->
+
+    struct bird {
+        ~bird() { std::puts("in a bird"); }
+    };
+    
+    bird in = bird(bird(bird(bird(bird()))));
+
+<!--kg-card-end: code-->
+
+_Once!_
+
+Thanks to C++'s return value optimisation. You can disable this behaviour by passing _-fno-elide-constructors_ to the compiler. Unless you're using a standard later than C++14 then it happens regardless.
+
+So does this mean we can't let copy constructors cause side-effects, lest the compiler doesn't bother calling them?
+
+See c[opy elision](https://en.cppreference.com/w/cpp/language/copy_elision) and [run the example](https://coliru.stacked-crooked.com/a/5c0ff3f3d2d99bea).
+

@@ -1,0 +1,31 @@
+---
+layout: post
+title: Skills timeline
+date: '2019-06-07 10:30:06'
+---
+
+## Pluralsight evaluations
+
+- C++ - 244
+- Using the Scrum Framework - 216
+- Networking Fundamentals (N10-007) - 200
+- Git - 196
+- GitHub - 187
+- Linux Fundamentals - 172
+- Ethical Hacking - 162
+- AWS Cloud Compute - 158
+- HTML5 - 108
+
+## Influential technology by year
+
+- 2019 - Cloud compute, R (and the whole notebooks thing)
+- 2018 - Docker (containers)
+- 2017 - Cryptocurrency, blockchain
+- 2016 - C++/1z
+- 2015 - git
+
+## Linux distributions
+
+- Debian (Kali, Ubuntu)
+- Redhat (Enterprise, CentOS, Scientific Linux)
+- Alpine

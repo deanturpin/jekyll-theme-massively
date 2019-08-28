@@ -1,0 +1,23 @@
+---
+layout: post
+title: Generating a network topology from a hosts file
+date: '2019-06-14 16:25:18'
+tags:
+- linux
+- bash
+- network
+---
+
+A bash script that parses a standard hosts files and generates an SVG. The script accepts a standard system hosts file format but actually it only cares about the first host or IP on a line – the whole line is used to name the leaf node. In fact any file format may be used as long as each line begins with something that can be pinged.
+
+<!--kg-card-begin: code-->
+
+    127.0.0.1 localhost # for local people
+    216.58.213.99 - google
+    silobrighton.com # Zero waste
+
+<!--kg-card-end: code-->
+
+The image below is regenerated as a daily [Travis CI](https://travis-ci.org/deanturpin/hosts2dot) cron job. See the source on [GitHub](https://github.com/deanturpin/hosts2dot).
+
+<!--kg-card-begin: html-->[![](https://deanturpin.github.io/hosts2dot/topology.svg)](https://deanturpin.github.io/hosts2dot/topology.svg)<!--kg-card-end: html-->

@@ -1,0 +1,10 @@
+---
+layout: post
+title: KEYnote
+date: '2019-07-26 09:00:25'
+---
+
+See the source on [GitHub](https://github.com/deanturpin/KEYnote).
+
+## Note mapping
+<!--kg-card-begin: html--><script src="https://gist.github.com/deanturpin/a76ef9b736f235a775f129f251a4c698.js"></script><!--kg-card-end: html-->

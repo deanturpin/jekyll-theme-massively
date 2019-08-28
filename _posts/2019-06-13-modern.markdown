@@ -1,0 +1,301 @@
+---
+layout: post
+title: Welcome to the std::promised land
+date: '2019-06-13 16:26:43'
+tags:
+- c
+- migration
+---
+
+## Auto
+
+Type inference is a game changer. Essentially you can simplify complicated (or unknown) type declarations with _auto_. But it can be a balance of convenience over readability.
+
+<!--kg-card-begin: code-->
+
+    int x1 = 5; // Explicit
+    auto x2 = 5; // What's the underlying literal type?
+    
+    std::vector<std::string moon> = {"Don't", "look", "at", "the", "finger"};
+    auto finger = moon.front();
+
+<!--kg-card-end: code-->
+
+And there are a few perfectly valid gotchas that arguably wouldn't make it through code review. Let's create a variable and a reference to it, updating _y2_ (below) also updates _y1_ as expected.
+
+<!--kg-card-begin: code-->
+
+    int y1 = 1;
+    int &y2 = y1;
+    y2 = 2;
+
+<!--kg-card-end: code-->
+
+But how does _auto_ deal with references? Do you get another reference or a copy? (Hint: auto "decays" to the base type - no consts, no refs).
+
+<!--kg-card-begin: code-->
+
+    int y1 = 1;
+    int &y2 = y1;
+    auto y3 = y2;
+    auto &y4 = y2;
+
+<!--kg-card-end: code-->
+## Brace initialisers
+
+These take a bit of getting used to but they do give you extra checks. For example the compiler coughs a narrowing warning for the following. The "moon" vector above we could have equally declared without the "=".
+
+<!--kg-card-begin: code-->
+
+    double wide{1.0};
+    float narrow{wide};
+
+<!--kg-card-end: code-->
+## Initialiser lists
+
+We used to create a vector and then push elements onto it (ignoring the potential copy overhead of resizing vectors). But with initialiser lists you can populate containers much more concisely.
+
+Initialise a container.
+
+<!--kg-card-begin: code-->
+
+    std::list v1{1, 2, 3, 4, 5, 6};
+
+<!--kg-card-end: code-->
+
+Initialise a pair.
+
+<!--kg-card-begin: code-->
+
+    std::pair<int, std::string> p1{1, "two"};
+
+<!--kg-card-end: code-->
+
+Initialise more complex types
+
+<!--kg-card-begin: code-->
+
+    struct S {
+        int x;
+        struct Foo {
+            int i;
+            int j;
+            int a[3];
+        } b;
+    };
+    
+    S s1 = {1, {2, 3, {4, 5, 6}}};
+
+<!--kg-card-end: code-->
+## Range-based for loops
+
+Clumsy explicit iterator declarations can be cleaned up with _auto_.
+
+<!--kg-card-begin: code-->
+
+    for (std::list::iterator i = v2.begin(); i != v2.end(); ++i)
+        *i += 1;
+    
+    for (auto i = v2.begin(); i != v2.end(); ++i)
+        *i += 1;
+
+<!--kg-card-end: code-->
+
+In fact we can drop the iterators altogether and avoid that \*i dereferencing idiom.
+
+<!--kg-card-begin: code-->
+
+    for (auto &i : v4)
+        i += 1;
+
+<!--kg-card-end: code-->
+
+Note you don't have access to the current index (until C++2a). Which isn't necessarily a bad thing. Hold that thought...
+
+## Lambda expressions
+
+Think function pointers but a much friendlier implementation. Call like a regular function or pass them as a parameter. You can also define them in-place so you don't have to go hunting for the implementation like you might if you passed a function name. Here's another new for-loop variation too. Note the use of _std::cbegin()_ rather than the method.
+
+<!--kg-card-begin: code-->
+
+    const auto printer = { std::cout << "I am a first-class citizen\n"; };
+    
+    // Call like a function
+    printer();
+    
+    // In-place lambda definition
+    const std::vector d{0.0, 0.1, 0.2};
+    
+    std::for_each(std::cbegin(d), std::cend(d),[](const auto &i) { std::cout << i << "\n"; });
+
+<!--kg-card-end: code-->
+## Threads
+
+Thread are much neater than the old POSIX library but futures are really interesting and let you return the stuff you're interested in much more easily.
+
+Define a processor-heavy routine as a lambda. Here the return has been declared explicitly.
+
+<!--kg-card-begin: code-->
+
+    const auto complicated = [](){ return 1; };
+
+<!--kg-card-end: code-->
+
+And effectively push our complicated routine into the background and get on with something else. Note we don't have to actually define what f is thanks to _auto_. (It's actually a _std::future_.)
+
+<!--kg-card-begin: code-->
+
+    auto f = std::async(std::launch::async, complicated);
+
+<!--kg-card-end: code-->
+
+When we're ready we block to get the value. We could change the return type of complicated() and nothing else needs to change.
+
+<!--kg-card-begin: code-->
+
+    std::cout << f.get() << "\n";
+
+<!--kg-card-end: code-->
+## Optional types
+
+This overcomes the problem of defining a "not initialised" value which is inevitably used to index an array. Your functions can effectively return a "no result". Let's create a container with some default entries.
+
+<!--kg-card-begin: code-->
+
+    std::deque<std::optional> options{0, 1, 2, 3, 4};
+
+<!--kg-card-end: code-->
+
+Make the one at the back undefined.
+
+<!--kg-card-begin: code-->
+
+    options.back() = {};
+
+<!--kg-card-end: code-->
+
+And count the valid entries with the help of a lambda expression.
+
+<!--kg-card-begin: code-->
+
+    const auto c = std::count_if(std::cbegin(options), std::cend(options),	
+    	[](const auto &o) { return o; });
+
+<!--kg-card-end: code-->
+## Digit separators
+
+If you're defining hardware interfaces then you'll probably have register maps defined as hexadecimals. Using digit separators can help improve readability in some cases.
+
+<!--kg-card-begin: code-->
+
+    int reg1 = 0x5692a5b6;
+    int reg2 = 0x5692'a5b6;
+    double reg3 = 1'000.000'001;
+
+<!--kg-card-end: code-->
+
+You can even define things in binary if it's clearer. And also specify the size of a type explicitly – a 32-bit integer, say – rather than letting the compiler decide.
+
+<!--kg-card-begin: code-->
+
+    const uint32_t netmask{0b11111111'11111111'11111111'00000000};
+    assert(netmask == 0xff'ff'ff'00);
+    assert(sizeof netmask == 4);
+
+<!--kg-card-end: code-->
+## Type aliases
+
+Create type-safe typedefs with _using_. Note the trailing cluster of angle-brackets are parsed correctly in C++11 (no need to insert spaces).
+
+<!--kg-card-begin: code-->
+
+    using container_t = std::vector<std::pair<std::string, std::string>>;
+    container_t safe;
+
+<!--kg-card-end: code-->
+## Structured bindings
+
+You might declare intermediate variables to make the first/second more meaningful below.
+
+<!--kg-card-begin: code-->
+
+    std::pair<std::string, std::string> chuckle{"to me", "to you"};
+    std::cout << chuckle.first << ", " << chuckle.second << "\n";
+
+<!--kg-card-end: code-->
+
+But you can also do it in one expression with structured bindings.
+
+<!--kg-card-begin: code-->
+
+    auto [barry, paul] = chuckle;
+    std::cout << barry << ", " << paul << "\n";
+
+<!--kg-card-end: code-->
+## Standard literals
+<!--kg-card-begin: code-->
+
+    using namespace std::complex_literals;
+    using namespace std::string_literals;
+    using namespace std::chrono_literals;
+    
+    // auto deduces complex
+    auto z = 1i;
+    
+    // auto deduces string
+    auto str = "hello world"s;
+    
+    // auto deduces chrono::seconds
+    auto dur = 60s;
+    
+    // Or if you want all the literals
+    using namespace std::literals;
+
+<!--kg-card-end: code-->
+## Tuples
+
+Like pairs but better. Arbitrary collection of heterogenous types. You can retrieve values by index (which looks a bit odd) or even by type!
+
+<!--kg-card-begin: code-->
+
+    std::tuple<std::string, double, int> h1{"one", 2.0, 3};
+    std::string << " " << std::get<0> << " " << std::get<1> << "\n";
+
+<!--kg-card-end: code-->
+## std::byte
+
+When you really want something to be a byte and not something that looks a bit like a char.
+
+<!--kg-card-begin: code-->
+
+    std::byte b1{4};
+
+<!--kg-card-end: code-->
+## Exchanging values
+
+Replace that old declare-a-temp variable idiom with an atomic update. _std::exchange_ also returns the original value.
+
+<!--kg-card-begin: code-->
+
+    int current = 5;
+    int previous = std::exchange(current, 6);
+
+<!--kg-card-end: code-->
+## Things to remove
+
+### inline
+
+Just let the compiler decide what should be inlined. It will probably ignore you anyway.
+
+## Move semantics
+
+This is a biggie that you exploit just by moving to C++11 and beyond. The compiler can now choose to move data where previously it would have copied it, potentially giving huge performance benefits.
+
+## Smart pointers
+
+You no longer need to use new and delete explicitly. Smart pointers clean up after themselves when they go out of scope: Resource Allocation Is Initialistion (RAII).
+
+## References
+
+- Guidelines by [Stroustrup and Sutter](https://github.com/isocpp/CppCoreGuidelines)
+- Compiled examples on [GitHub](https://github.com/deanturpin/modern-cpp-migration)

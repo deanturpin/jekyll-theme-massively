@@ -1,0 +1,15 @@
+---
+layout: post
+title: But does it SSH?
+date: '2019-06-27 19:36:27'
+tags:
+- linux
+- google-cloud
+- ssh
+- tablet
+- bash
+---
+
+Making use of an old Amazon Fire tablet and a cheap Bluetooth keyboard to login to an 8-core Linux instance. The web SSH client doesn't work properly on any browser on my iPhone but inexplicably it's fine in an old Silk! I _think_ there's some JavaScript failing on my modern phone that just gets ignored on the Amazon tablet.
+
+<!--kg-card-begin: html--><iframe width="700" height="525" src="https://www.youtube.com/embed/ZvpoW4Le1e4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><!--kg-card-end: html-->

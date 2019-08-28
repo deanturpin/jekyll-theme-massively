@@ -1,0 +1,112 @@
+---
+layout: post
+title: Turbo charge your bash prompt
+date: '2019-06-12 15:52:17'
+tags:
+- linux
+- bash
+- cli
+---
+
+## Bash prompt variables
+
+The escape characters that can appear in the bash prompt are [well-documented](https://www.gnu.org/software/bash/manual/bash.html#Controlling-the-Prompt) so let’s not cover that in any detail. But a good starting point is the “user@host:dir” combo, which conveniently is also the _scp_ syntax.
+
+<!--kg-card-begin: code-->
+
+    PS1="\u@\h:\w $ "
+
+<!--kg-card-end: code--><!--kg-card-begin: code-->
+
+    root@kali:/tmp $
+
+<!--kg-card-end: code-->
+
+Variables described in the bash documentation:
+
+> PS1 - The primary prompt string. The default value is ‘\s-\v\$ ’.
+
+> PS0 - The value of this parameter is expanded like _PS1_ and displayed by interactive shells after reading a command and before the command is executed.
+
+> PROMPT\_COMMAND - If set, the value is interpreted as a command to execute before the printing of each primary prompt ($PS1).
+
+## Sequence of evaluation
+
+1. Read user command
+2. Evaluate _PS0_
+3. Execute user command
+4. Execute _PROMPT\_COMMAND_
+5. Evaluate _PS1_
+
+_PROMPT\_COMMAND_ seems the perfect place to place arbitrary functions but the terminal doesn't count any characters emitted and you end up with ugly alignment side-effects (more on that below). So let's insert commands directly into _PS1. N_otice I’ve used single quotes to ensure the command is run each time, not just when _PS1_ is set. And we’re doing all our dev “locally” in the shell rather than editing bash configuration files, so we can simply run _bash_ again at the prompt if our experiments have gone awry.
+
+Let's ping a host of interest each time we hit return.
+
+<!--kg-card-begin: code-->
+
+    PS1='$(ping -c 1 -w 1 github.com >& /dev/null && echo OK || echo FAIL) \u@\h:\w $ '
+
+<!--kg-card-end: code-->
+
+Great! When it succeeds. But if it fails and takes even a second to return the prompt becomes unusable.
+
+## Using color
+
+You _can_ use the ANSI _\e[33m_ codes in your bash scripts but I think _tput_ is a far friendlier interface. (You'll still need to know the codes for your compiled code.)
+
+Find out how many colours your system supports and print them.
+
+<!--kg-card-begin: code-->
+
+    tput colors
+    for c in {0..255}; do echo $(tput setab $c) \ $(tput sgr0)$c; done | column 
+
+<!--kg-card-end: code--><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="/content/images/2019/06/available-colours-1.png" class="kg-image"></figure><!--kg-card-end: image-->
+## Ignoring control characters
+
+If you're using non-printable control characters like setting the colour you must tell the shell not to count them lest it misbehaves. Cursoring through history doesn't work in this example:
+
+<!--kg-card-begin: code-->
+
+    PS1="$(tput setaf 44)$(date)$(tput sgr0) $ "
+
+<!--kg-card-end: code-->
+
+But we simply need to tell bash to ignore the control characters by enclosing them in square brackets thus:
+
+<!--kg-card-begin: code-->
+
+    PS1="\[$(tput setaf 44)\]$(date)\[$(tput sgr0)\] $ "
+
+<!--kg-card-end: code-->
+## What can we do at the prompt?
+
+How about checking your crypto prices?
+
+<!--kg-card-begin: code-->
+
+    PS1='$(
+    curl --silent "https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD" | grep -o [0-9\.]*
+    ) \u@\h:\w $ '
+
+<!--kg-card-end: code--><!--kg-card-begin: code-->
+
+    9080.52 root@kali:/tmp $
+
+<!--kg-card-end: code-->
+
+Or displaying the location of your public IP?
+
+<!--kg-card-begin: code-->
+
+    PS1='$(
+    curl --silent ifconfig.co/country
+    ) \u@\h:\w $ '
+
+<!--kg-card-end: code--><!--kg-card-begin: code-->
+
+    United Kingdom root@kali:~/cpp $ 
+
+<!--kg-card-end: code-->
+## Further examples
+<!--kg-card-begin: html--><script src="https://gist.github.com/deanturpin/2fc1bec5dfc7015e2be2b133713a91c0.js"></script><!--kg-card-end: html-->

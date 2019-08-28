@@ -1,0 +1,21 @@
+---
+layout: post
+title: How does your vector grow?
+date: '2019-06-28 10:43:51'
+tags:
+- c
+- chmod666
+---
+
+How often is the destructor called below after populating a five element STL vector? Remarkably it's 17 times. [Run the code](https://coliru.stacked-crooked.com/a/50ccbbb1bdca6985) yourself.
+
+<!--kg-card-begin: code-->
+
+    g++ -std=c++2a main.cpp && ./a.out
+
+<!--kg-card-end: code--><!--kg-card-begin: html--><script src="https://gist.github.com/deanturpin/8e82cc22f7da3542aae03f9ab26ebda8.js"></script><!--kg-card-end: html-->
+
+For each push we call the default constructor to create a transient object and then call the copy constructor to populate the new element with its data. So far so good. But crucially when the vector is resized we must also copy all the existing elements into the new container, resulting in an unexpected growth. Not an issue for this simple case but what if the class were large? Additionally if there's a bug in the copy constructor and pushing a new element exceeds the underlying vector capacity then we could be corrupting existing valid data just by quietly copying it around.
+
+<!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="/content/images/2019/06/image-1.png" class="kg-image"></figure><!--kg-card-end: image-->
+

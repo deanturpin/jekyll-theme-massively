@@ -1,0 +1,17 @@
+---
+layout: post
+title: tradeR
+date: '2019-06-15 08:44:59'
+tags:
+- currency
+- statistics
+- r
+---
+
+Currency price analysis in R. Market data via the [CryptoCompare API](https://min-api.cryptocompare.com/) and prices fetched in parallel using make. See the source on [GitHub](https://github.com/deanturpin/tradeR), analyses generated nightly on [Travis CI](https://travis-ci.org/deanturpin/tradeR).
+
+TURBO token is a fictional currency created to illustrate how much a normal distribution of random numbers can look like a real currency. The red markers highlight when the latest price has dropped by a significant amount: a number of standard deviations. A "2% over a day" line is projected out from the final price to indicate if there's enough activity to achieve the target yield.
+
+## Recent data
+<!--kg-card-begin: html--><iframe style="width: 100%; height: 6000px; border:none;" src="https://deanturpin.github.io/tradeR/">
+</iframe><!--kg-card-end: html-->
